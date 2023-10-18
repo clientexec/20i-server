@@ -218,15 +218,18 @@ class Plugin20i extends ServerPlugin
             $ssoUrl = $this->api->singleSignOn($tokenInfo->access_token, $packageInfo->name);
 
             return array(
-                'link'    => '<li><a target="_blank" href="' . $ssoUrl . '">' . $linkText . '</a></li>',
-                'rawlink' =>  $ssoUrl,
-                'form'    => ''
+                'fa' => 'fa fa-user fa-fw',
+                'link' => $ssoUrl,
+                'text' => $linkText,
+                'form' => ''
             );
         } else {
             $link = 'index.php?fuse=clients&controller=products&action=openpackagedirectlink&packageId=' . $userPackage->getId() . '&sessionHash=' . CE_Lib::getSessionHash();
 
             return array(
-                'link' => '<li><a target="_blank" href="' . $link .  '">' . $linkText . '</a></li>',
+                'fa' => 'fa fa-user fa-fw',
+                'link' => $link,
+                'text' => $linkText,
                 'form' => ''
             );
         }

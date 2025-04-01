@@ -45,6 +45,11 @@ class Plugin20i extends ServerPlugin
                 "value" => "",
                 "encryptable" => true
             ],
+            lang("DC Location Custom Field") => array(
+                "type"        => "text",
+                "description" => lang("Enter the name of the package custom field that will hold the Location"),
+                "value"       => ""
+            ),
             lang("Actions") => [
                 "type" => "hidden",
                 "description" => lang("Current actions that are active for this plugin per server"),
@@ -72,15 +77,21 @@ class Plugin20i extends ServerPlugin
         $this->setup($args);
 
         $stackUser = $this->findOrCreateStackUser($args);
-
-        $response = $this->api->postWithFields('/reseller/*/addWeb', [
-            "type" => $args['package']['name_on_server'],
-            "domain_name" => $args['package']['domain_name'],
-            "stackUser" => $stackUser,
-            // "location" => $dcLocation,
-        ]);
-
         $userPackage = new UserPackage($args['package']['id']);
+
+        if ($args['server']['variables']['plugin_20i_DC_Location_Custom_Field'] != '') {
+            $dcLocation = $userPackage->getCustomField($args['server']['variables']['plugin_20i_DC_Location_Custom_Field'], CUSTOM_FIELDS_FOR_PACKAGE);
+        }
+
+        $request = [
+            'type' => $args['package']['name_on_server'],
+            'domain_name' => $args['package']['domain_name'],
+            'stackUser' => $stackUser,
+        ];
+        if (!empty($dcLocation)) {
+            $request['location'] = $dcLocation;
+        }
+        $response = $this->api->postWithFields('/reseller/*/addWeb', $request);
         $userPackage->setCustomField('Server Acct Properties', $response->result);
     }
 
@@ -239,7 +250,7 @@ class Plugin20i extends ServerPlugin
     {
         $userPackage = new UserPackage($args['userPackageId']);
         $response = $this->getDirectLink($userPackage);
-        return $response['rawlink'];
+        return $response['link'];
     }
 
     private function findStackUser($args)
